@@ -27,11 +27,12 @@ public class PowerUpActuator implements Actuator {
     private String password;
     private String privilege;
     private int port;
+    private int bootDuration;
     private BootNode action;
-    private IpmiChassisControl ipmiCC;
 
     public PowerUpActuator(BootNode action, String ipAddress, String username,
-                           String password, String privilege, int port) {
+                           String password, String privilege, int port,
+                           int bootDuration) {
 
         this.action = action;
         this.ipAddress = ipAddress;
@@ -39,18 +40,20 @@ public class PowerUpActuator implements Actuator {
         this.password = password;
         this.privilege = privilege;
         this.port = port;
+        this.bootDuration = bootDuration;
     }
 
     @Override
     public void execute() throws ExecutorException {
 
-        ipmiCC = new IpmiChassisControl(ipAddress, username, password,
-                privilege, port);
+        IpmiChassisControl ipmiCC = new IpmiChassisControl(ipAddress, username,
+                password, privilege, port);
 
         try {
             ipmiCC.chassisControlActionPowerUp();
+            Thread.sleep(bootDuration * 1000);
         } catch (Exception e) {
-            throw new ExecutorException(this, e.getMessage());
+            throw new ExecutorException(this, e);
         }
     }
 
