@@ -18,7 +18,7 @@
 import btrplace.executor.Actuator;
 import btrplace.executor.ActuatorBuilder;
 import btrplace.plan.event.Action;
-import btrplace.plan.event.BootNode;
+import btrplace.plan.event.ShutdownNode;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import java.util.Properties;
 public class PowerDownActuatorBuilder implements ActuatorBuilder {
 
     @Override
-    public Class getAssociatedAction() { return BootNode.class; }
+    public Class getAssociatedAction() { return ShutdownNode.class; }
 
     @Override
     public Actuator build(Action action) {
@@ -41,7 +41,8 @@ public class PowerDownActuatorBuilder implements ActuatorBuilder {
             System.out.println(e.getMessage());
         }
 
-        return new PowerDownActuator((BootNode)action,
+        // Create and return the PowerDown actuator
+        return new PowerDownActuator((ShutdownNode)action,
                 properties.getProperty("ipAddress"),
                 properties.getProperty("username"),
                 properties.getProperty("password"),

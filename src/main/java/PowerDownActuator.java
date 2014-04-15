@@ -18,7 +18,7 @@
 import btrplace.executor.Actuator;
 import btrplace.executor.ExecutorException;
 import btrplace.plan.event.Action;
-import btrplace.plan.event.BootNode;
+import btrplace.plan.event.ShutdownNode;
 
 public class PowerDownActuator implements Actuator {
 
@@ -27,8 +27,7 @@ public class PowerDownActuator implements Actuator {
     private String password;
     private String privilege;
     private int port;
-    private BootNode action;
-    private IpmiChassisControl ipmiCC;
+    private ShutdownNode action;
 
     public PowerDownActuator(BootNode action, String ipAddress,
                              String username, String password,
@@ -43,16 +42,15 @@ public class PowerDownActuator implements Actuator {
     }
 
     @Override
-    public void execute() throws ExecutorException
-    {
+    public void execute() throws ExecutorException {
 
-        ipmiCC = new IpmiChassisControl(ipAddress, username, password,
-                privilege, port);
+        IpmiChassisControl ipmiCC = new IpmiChassisControl(ipAddress, username,
+                password, privilege, port);
 
         try {
             ipmiCC.chassisControlActionPowerDown();
         } catch (Exception e) {
-            throw new ExecutorException(this, e.getMessage());
+            throw new ExecutorException(this, e);
         }
     }
 

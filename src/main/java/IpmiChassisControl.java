@@ -161,7 +161,7 @@ public class IpmiChassisControl {
                            Exception exception) {
             this.responseData = responseData;
             if (exception != null) {
-                //System.out.println(exception.getMessage());
+                System.out.println(exception.getMessage());
                 this.responseData = null;
             }
             responseArrived = true;
