@@ -13,8 +13,6 @@ import com.veraxsystems.vxipmi.connection.ConnectionManager;
 import java.net.InetAddress;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 /**
  * Created by vkherbac on 14/04/14.
  */
