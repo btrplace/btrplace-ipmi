@@ -2,7 +2,7 @@
 
 A simple artifact to execute reconfiguration plans.
 
-[![Build Status](http://btrp.inria.fr:8080/jenkins/buildStatus/icon?job=DEV btrplace-ipmi)](http://btrp.inria.fr:8080/jenkins/job/DEV%20btrplace-ipmi/)
+[![Build Status](http://btrp.inria.fr:8080/jenkins/buildStatus/icon?job=DEV actuator-ipmi)](http://btrp.inria.fr:8080/jenkins/job/DEV%20actuator-ipmi/)
 
 ## Integration ##
 
@@ -27,7 +27,7 @@ Next, just declare the dependency:
 <dependency>
    <groupId>btrplace</groupId>
    <artifactId>actuator-ipmi</artifactId>
-   <version>1.0-SNAPSHOT</version>
+   <version>1.0</version>
 </dependency>
 ```
 
@@ -53,7 +53,8 @@ installed in your local maven repository and available in the `target` sub-folde
 * snapshot-releases: http://btrp.inria.fr/actuator-ipmi/apidocs-snapshot
 
 ## Usage ##
-...
+
+__ TO COMPLETE __
 
 ## Copyright ##
 Copyright (c) 2014 Inria. See `LICENSE.txt` for details

@@ -81,7 +81,6 @@ perform)
     echo "-- Generate the javadoc for release ${VERSION} --"
     ./release_javadoc.sh /usr/share/nginx/html
 
-
     echo "-- Notify the website for release ${VERSION} --"
     ./bump_release.sh site ${VERSION}
     ;;
