@@ -127,18 +127,18 @@ public class IpmiChassisControl {
         connection.sendIpmiCommand(coder);
 
         int time = 0;
-        int timeout = 5000; //5s
+        int timeout = 5; //5s timeout
 
         while (!listener.responseArrived && time < timeout) {
-            Thread.sleep(1); //1ms
+            Thread.sleep(1000); //1s
             time ++;
         }
 
         if (time < timeout) {
             ResponseData responseData = listener.getResponseData();
-            //System.out.println("Response: " + responseData.toString() + "\n");
+            System.out.println("Response: " + responseData.toString() + "\n");
         }
-        else { throw new Exception("Response timeout"); }
+        else throw new Exception("Response timeout");
     }
 
     private class ConnectionListenerImpl implements ConnectionListener {
