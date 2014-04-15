@@ -53,7 +53,8 @@ installed in your local maven repository and available in the `target` sub-folde
 * snapshot-releases: http://btrp.inria.fr/actuator-ipmi/apidocs-snapshot
 
 ## Usage ##
-...
+
+__ TO COMPLETE __
 
 ## Copyright ##
 Copyright (c) 2014 Inria. See `LICENSE.txt` for details
