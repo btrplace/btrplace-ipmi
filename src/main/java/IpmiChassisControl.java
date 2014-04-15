@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014 INRIA
+ *
+ * This file is part of btrplace.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import com.veraxsystems.vxipmi.coding.commands.IpmiCommandCoder;
 import com.veraxsystems.vxipmi.coding.commands.IpmiVersion;
 import com.veraxsystems.vxipmi.coding.commands.PrivilegeLevel;
@@ -14,7 +31,9 @@ import java.net.InetAddress;
 import java.util.List;
 
 /**
- * Created by vkherbac on 14/04/14.
+ * Control nodes' chassis through IPMI
+ *
+ * @author Vincent KHERBACHE
  */
 public class IpmiChassisControl {
 
@@ -31,6 +50,15 @@ public class IpmiChassisControl {
     private ConnectionListenerImpl listener;
     private PrivilegeLevel privilege;
 
+    /**
+     * Initiates IpmiChassisControl
+     *
+     * @param ipAddress the IP address of the destination node
+     * @param username  the username  to authenticate with the BMC
+     * @param password  the password to authenticate with the BMC
+     * @param privilege the user privilege level
+     * @param port      the port that library will bind to (waiting for answer)
+     */
     public IpmiChassisControl (String ipAddress, String username,
                                String password, String privilege, int port) {
 
@@ -39,15 +67,24 @@ public class IpmiChassisControl {
         this.password = password;
         this.port = port;
 
-        if (privilege.equals("Administrator")) {
-            this.privilege = PrivilegeLevel.Administrator;
+        switch (privilege) {
+            case "Administrator":
+                this.privilege = PrivilegeLevel.Administrator;
+                break;
+            case "Operator":
+                this.privilege = PrivilegeLevel.Operator;
+                break;
+            default:
+                this.privilege = PrivilegeLevel.User;
+                break;
         }
-        else if (privilege.equals("Operator")) {
-            this.privilege = PrivilegeLevel.Operator;
-        }
-        else {  this.privilege = PrivilegeLevel.User; }
     }
 
+    /**
+     * Initialize the connection to the remote node and establish a session
+     *
+     * @throws Exception
+     */
     protected void init() throws Exception {
 
         connectionManager = new ConnectionManager(port);
@@ -72,6 +109,11 @@ public class IpmiChassisControl {
         connection = connectionManager.getConnection(index);
     }
 
+    /**
+     * Close the connection to the remote node
+     *
+     * @throws Exception
+     */
     protected void close() throws Exception {
 
         connection.closeSession();
@@ -79,6 +121,11 @@ public class IpmiChassisControl {
         connectionManager.close();
     }
 
+    /**
+     * Power up the remote node
+     *
+     * @throws Exception
+     */
     public void chassisControlActionPowerUp() throws Exception {
 
         init();
@@ -90,6 +137,11 @@ public class IpmiChassisControl {
         close();
     }
 
+    /**
+     * Power down the remote node
+     *
+     * @throws Exception
+     */
     public void chassisControlActionPowerDown() throws Exception {
 
         init();
@@ -101,35 +153,54 @@ public class IpmiChassisControl {
         close();
     }
 
+    /**
+     * Send an IPMI command through the existing connection
+     *
+     * @param coder
+     * @throws Exception
+     */
     private void sendCommand(IpmiCommandCoder coder) throws Exception {
 
         connection.sendIpmiCommand(coder);
 
         int time = 0;
-        int timeout = 5000; //5s
+        int timeout = 5; //5s timeout
 
+        // Waiting for the response
         while (!listener.responseArrived && time < timeout) {
-            Thread.sleep(1); //1ms
+            Thread.sleep(1000); //1s
             time ++;
         }
 
         if (time < timeout) {
             ResponseData responseData = listener.getResponseData();
-            //System.out.println("Response: " + responseData.toString() + "\n");
+            System.out.println("Response: " + responseData.toString() + "\n");
         }
-        else { throw new Exception("Response timeout"); }
+        else throw new Exception("Response timeout");
     }
 
+    /**
+     * Implement ConnectionListener interface to manage the IPMI response
+     * processing
+     */
     private class ConnectionListenerImpl implements ConnectionListener {
 
         private ResponseData responseData;
         private boolean responseArrived;
 
+        /**
+         * Getter for the response data
+         *
+         * @return  the response data
+         */
         public ResponseData getResponseData() {
             responseArrived = false;
             return responseData;
         }
 
+        /**
+         * Initiates ConnectionListener
+         */
         public ConnectionListenerImpl() {
             responseArrived = false;
             responseData = null;
@@ -140,7 +211,7 @@ public class IpmiChassisControl {
                            Exception exception) {
             this.responseData = responseData;
             if (exception != null) {
-                //System.out.println(exception.getMessage());
+                System.out.println(exception.getMessage());
                 this.responseData = null;
             }
             responseArrived = true;
