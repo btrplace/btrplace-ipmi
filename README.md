@@ -2,7 +2,7 @@
 
 A simple artifact to execute reconfiguration plans.
 
-[![Build Status](http://btrp.inria.fr:8080/jenkins/buildStatus/icon?job=DEV btrplace-ipmi)](http://btrp.inria.fr:8080/jenkins/job/DEV%20btrplace-ipmi/)
+[![Build Status](http://btrp.inria.fr:8080/jenkins/buildStatus/icon?job=DEV actuator-ipmi)](http://btrp.inria.fr:8080/jenkins/job/DEV%20actuator-ipmi/)
 
 ## Integration ##
 
