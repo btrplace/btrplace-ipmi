@@ -56,13 +56,17 @@ public class IpmiChassisControl {
         this.password = password;
         this.port = port;
 
-        if (privilege.equals("Administrator")) {
-            this.privilege = PrivilegeLevel.Administrator;
+        switch (privilege) {
+            case "Administrator":
+                this.privilege = PrivilegeLevel.Administrator;
+                break;
+            case "Operator":
+                this.privilege = PrivilegeLevel.Operator;
+                break;
+            default:
+                this.privilege = PrivilegeLevel.User;
+                break;
         }
-        else if (privilege.equals("Operator")) {
-            this.privilege = PrivilegeLevel.Operator;
-        }
-        else {  this.privilege = PrivilegeLevel.User; }
     }
 
     protected void init() throws Exception {
