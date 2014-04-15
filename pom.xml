@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>btrplace</groupId>
+    <artifactId>actuator-ipmi</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <repositories>
+        <repository>
+            <id>btrp-releases</id>
+            <url>http://btrp.inria.fr/repos/releases</url>
+        </repository>
+        <repository>
+            <id>btrp-snapshots</id>
+            <url>http://btrp.inria.fr/repos/snapshot-releases</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>btrplace</groupId>
+            <artifactId>executor</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>btrplace</groupId>
+            <artifactId>solver-api</artifactId>
+            <version>0.34</version>
+        </dependency>
+        <dependency>
+            <groupId>verax</groupId>
+            <artifactId>vxIPMI</artifactId>
+            <version>1.0.17</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
