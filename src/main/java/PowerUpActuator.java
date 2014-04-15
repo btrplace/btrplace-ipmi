@@ -20,6 +20,11 @@ import btrplace.executor.Actuator;
 import btrplace.plan.event.Action;
 import btrplace.plan.event.BootNode;
 
+/**
+ *  An actuator to execute the BootNode action
+ *
+ * @author Vincent KHERBACHE
+ */
 public class PowerUpActuator implements Actuator {
 
     private String ipAddress;
@@ -30,6 +35,17 @@ public class PowerUpActuator implements Actuator {
     private int bootDuration;
     private BootNode action;
 
+    /**
+     * Initiates the PowerUp actuator
+     *
+     * @param action        the action to execute
+     * @param ipAddress     the ip address of the destination node
+     * @param username      the username to authenticate with the BMC
+     * @param password      the password to authenticate with the BMC
+     * @param privilege     the user privilege level
+     * @param port          the port that library will bind to (waiting for answer)
+     * @param bootDuration  the estimated boot duration of the node
+     */
     public PowerUpActuator(BootNode action, String ipAddress, String username,
                            String password, String privilege, int port,
                            int bootDuration) {
@@ -43,12 +59,19 @@ public class PowerUpActuator implements Actuator {
         this.bootDuration = bootDuration;
     }
 
+    /**
+     * Execute the action by establishing a session to the remote node BMC
+     * and sending the PowerUp command
+     *
+     * @throws ExecutorException
+     */
     @Override
     public void execute() throws ExecutorException {
 
         IpmiChassisControl ipmiCC = new IpmiChassisControl(ipAddress, username,
                 password, privilege, port);
 
+        // Boot the node using IPMI and wait for the expected boot duration
         try {
             ipmiCC.chassisControlActionPowerUp();
             Thread.sleep(bootDuration * 1000);

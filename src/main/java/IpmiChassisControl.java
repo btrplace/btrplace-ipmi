@@ -31,7 +31,9 @@ import java.net.InetAddress;
 import java.util.List;
 
 /**
- * Created by vkherbac on 14/04/14.
+ * Control nodes' chassis through IPMI
+ *
+ * @author Vincent KHERBACHE
  */
 public class IpmiChassisControl {
 
@@ -48,6 +50,15 @@ public class IpmiChassisControl {
     private ConnectionListenerImpl listener;
     private PrivilegeLevel privilege;
 
+    /**
+     * Initiates IpmiChassisControl
+     *
+     * @param ipAddress the IP address of the destination node
+     * @param username  the username  to authenticate with the BMC
+     * @param password  the password to authenticate with the BMC
+     * @param privilege the user privilege level
+     * @param port      the port that library will bind to (waiting for answer)
+     */
     public IpmiChassisControl (String ipAddress, String username,
                                String password, String privilege, int port) {
 
@@ -69,6 +80,11 @@ public class IpmiChassisControl {
         }
     }
 
+    /**
+     * Initialize the connection to the remote node and establish a session
+     *
+     * @throws Exception
+     */
     protected void init() throws Exception {
 
         connectionManager = new ConnectionManager(port);
@@ -93,6 +109,11 @@ public class IpmiChassisControl {
         connection = connectionManager.getConnection(index);
     }
 
+    /**
+     * Close the connection to the remote node
+     *
+     * @throws Exception
+     */
     protected void close() throws Exception {
 
         connection.closeSession();
@@ -100,6 +121,11 @@ public class IpmiChassisControl {
         connectionManager.close();
     }
 
+    /**
+     * Power up the remote node
+     *
+     * @throws Exception
+     */
     public void chassisControlActionPowerUp() throws Exception {
 
         init();
@@ -111,6 +137,11 @@ public class IpmiChassisControl {
         close();
     }
 
+    /**
+     * Power down the remote node
+     *
+     * @throws Exception
+     */
     public void chassisControlActionPowerDown() throws Exception {
 
         init();
@@ -122,6 +153,12 @@ public class IpmiChassisControl {
         close();
     }
 
+    /**
+     * Send an IPMI command through the existing connection
+     *
+     * @param coder
+     * @throws Exception
+     */
     private void sendCommand(IpmiCommandCoder coder) throws Exception {
 
         connection.sendIpmiCommand(coder);
@@ -129,6 +166,7 @@ public class IpmiChassisControl {
         int time = 0;
         int timeout = 5; //5s timeout
 
+        // Waiting for the response
         while (!listener.responseArrived && time < timeout) {
             Thread.sleep(1000); //1s
             time ++;
@@ -141,16 +179,28 @@ public class IpmiChassisControl {
         else throw new Exception("Response timeout");
     }
 
+    /**
+     * Implement ConnectionListener interface to manage the IPMI response
+     * processing
+     */
     private class ConnectionListenerImpl implements ConnectionListener {
 
         private ResponseData responseData;
         private boolean responseArrived;
 
+        /**
+         * Getter for the response data
+         *
+         * @return  the response data
+         */
         public ResponseData getResponseData() {
             responseArrived = false;
             return responseData;
         }
 
+        /**
+         * Initiates ConnectionListener
+         */
         public ConnectionListenerImpl() {
             responseArrived = false;
             responseData = null;

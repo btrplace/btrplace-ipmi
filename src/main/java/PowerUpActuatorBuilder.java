@@ -24,6 +24,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+/**
+ * A builder to create a PowerUp actuator from a BootNode action
+ *
+ * @author Vincent KHERBACHE
+ */
 public class PowerUpActuatorBuilder implements ActuatorBuilder {
 
     @Override
@@ -34,18 +39,24 @@ public class PowerUpActuatorBuilder implements ActuatorBuilder {
 
         Properties properties = new Properties();
 
+        // Trying to load the config file
         try {
             properties.load(new FileInputStream(
                     "src/main/resources/connection.properties"));
         } catch (IOException e) {
+
+            // Print the error message into the console
+            // TODO: throw a new exception
             System.out.println(e.getMessage());
         }
 
+        // Create and return the PowerUp actuator
         return new PowerUpActuator((BootNode)action,
                 properties.getProperty("ipAddress"),
                 properties.getProperty("username"),
                 properties.getProperty("password"),
                 properties.getProperty("privilege"),
+                Integer.getInteger(properties.getProperty("bootDuration")),
                 Integer.getInteger(properties.getProperty("port")));
     }
 }

@@ -24,6 +24,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+/**
+ * A builder to create a PowerDown actuator from a ShutdownNode action
+ *
+ * @author Vincent KHERBACHE
+ */
 public class PowerDownActuatorBuilder implements ActuatorBuilder {
 
     @Override
@@ -34,10 +39,14 @@ public class PowerDownActuatorBuilder implements ActuatorBuilder {
 
         Properties properties = new Properties();
 
+        // Trying to load the config file
         try {
             properties.load(new FileInputStream(
                     "src/main/resources/connection.properties"));
         } catch (IOException e) {
+
+            // Print the error message into the console
+            // TODO: throw a new exception
             System.out.println(e.getMessage());
         }
 

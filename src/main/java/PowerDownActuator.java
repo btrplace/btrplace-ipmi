@@ -20,6 +20,11 @@ import btrplace.executor.ExecutorException;
 import btrplace.plan.event.Action;
 import btrplace.plan.event.ShutdownNode;
 
+/**
+ * An actuator to execute the ShutdownNode action
+ *
+ * @author Vincent KHERBACHE
+ */
 public class PowerDownActuator implements Actuator {
 
     private String ipAddress;
@@ -29,7 +34,17 @@ public class PowerDownActuator implements Actuator {
     private int port;
     private ShutdownNode action;
 
-    public PowerDownActuator(BootNode action, String ipAddress,
+    /**
+     * Initiates the PowerDown actuator
+     *
+     * @param action    the action to execute
+     * @param ipAddress the ip address of the destination node
+     * @param username  the username to authenticate with the BMC
+     * @param password  the password to authenticate with the BMC
+     * @param privilege the user privilege level
+     * @param port      the port that library will bind to (waiting for answer)
+     */
+    public PowerDownActuator(ShutdownNode action, String ipAddress,
                              String username, String password,
                              String privilege, int port) {
 
@@ -41,12 +56,19 @@ public class PowerDownActuator implements Actuator {
         this.port = port;
     }
 
+    /**
+     * Execute the action by establishing a session to the remote node BMC
+     * and sending the PowerDown command
+     *
+     * @throws ExecutorException
+     */
     @Override
     public void execute() throws ExecutorException {
 
         IpmiChassisControl ipmiCC = new IpmiChassisControl(ipAddress, username,
                 password, privilege, port);
 
+        // Turn off the node using IPMI
         try {
             ipmiCC.chassisControlActionPowerDown();
         } catch (Exception e) {
