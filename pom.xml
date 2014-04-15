@@ -23,16 +23,7 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    <repositories>
-        <repository>
-            <id>btrp-releases</id>
-            <url>http://btrp.inria.fr/repos/releases</url>
-        </repository>
-        <repository>
-            <id>btrp-snapshots</id>
-            <url>http://btrp.inria.fr/repos/snapshot-releases</url>
-        </repository>
-    </repositories>
+
     <description>Actuators to boot or shutdown nodes using IPMI.</description>
     <dependencies>
         <dependency>
