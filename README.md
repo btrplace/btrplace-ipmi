@@ -54,10 +54,12 @@ installed in your local maven repository and available in the `target` sub-folde
 
 ## Usage ##
 
-Look at the `PowerUpActuator` and the `PowerDownActuator` classes. Those are the classes
-to connect to an action through an `ActuatorBuilder`. A sample one is provided for each class but
-as such an adaptation is very specific to the way you store infrastructure information
-(protocol versions, credentials, servers address, ...) you shall define your own builder.
+Look at the `PowerUpActuator` and the `PowerDownActuator` classes. These classes allows
+to boot or to shutdown a node through the IPMI protocol.
+
+Sample builders are provided to provide the required parameters. However, these builders
+are very specific to the way you store the parameters (protocol versions, credentials, servers address, ...).
+In practice, you may then have to define your own builder to fit your specificities.
 
 ## Copyright ##
 Copyright (c) 2014 Inria. See `LICENSE.txt` for details
