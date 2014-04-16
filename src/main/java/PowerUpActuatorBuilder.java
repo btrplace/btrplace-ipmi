@@ -15,120 +15,87 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import btrplace.executor.Actuator;
 import btrplace.executor.ActuatorBuilder;
+import btrplace.executor.ExecutorException;
 import btrplace.model.Attributes;
 import btrplace.model.Model;
-import btrplace.model.Node;
-import btrplace.model.view.NamingService;
 import btrplace.plan.event.BootNode;
-import com.veraxsystems.vxipmi.coding.commands.IpmiVersion;
-import com.veraxsystems.vxipmi.coding.commands.PrivilegeLevel;
-import com.veraxsystems.vxipmi.coding.protocol.AuthenticationType;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 
 /**
- * A builder to create a PowerUp actuator from a BootNode action
+ * A builder to create a {@link PowerUpActuator} from a {@link btrplace.plan.event.BootNode} action
+ * Credentials and IPMI parameters are retrieved from a properties file using {@link IPMIProperties}.
+ * The node IP is retrieved from the {@link btrplace.model.Attributes} "ip"
  *
  * @author Vincent KHERBACHE
  */
 public class PowerUpActuatorBuilder implements ActuatorBuilder<BootNode> {
 
-    @Override
-    public Class<BootNode> getAssociatedAction() { return BootNode.class; }
+    private String path;
+
+    /**
+     * Make a new builder.
+     *
+     * @param p the path to the property file
+     */
+    public PowerUpActuatorBuilder(String p) {
+        path = p;
+    }
+
+    /**
+     * Get the path of the properties file
+     *
+     * @return a path
+     */
+    public String getProperties() {
+        return path;
+    }
+
+    /**
+     * Set the path of the properties file
+     *
+     * @return a path
+     */
+    public void setProperties(String path) {
+        this.path = path;
+    }
 
     @Override
-    public Actuator build(Model model, BootNode action) {
+    public Class<BootNode> getAssociatedAction() { return BootNode.class;
+    }
 
-        PrivilegeLevel privilege;
-        AuthenticationType authType;
-        IpmiVersion ipmiVersion;
+    @Override
+    public PowerUpActuator build(Model model, BootNode action) throws ExecutorException {
 
         // Get the node attribute (ip address)
         Attributes attrs = model.getAttributes();
         String ipAddress = attrs.getString(action.getNode(), "ip");
-
+        if (ipAddress == null) {
+            throw new ExecutorException(action);
+        }
         // Get the estimated boot duration
-        int bootDuration = (action.getEnd()-action.getStart());
+        int bootDuration = action.getEnd()-action.getStart();
 
         // Trying to load the config file
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream(
-                    "src/main/resources/connection.properties"));
-        } catch (IOException e) {
-
-            // Print the error message into the console
-            // TODO: throw a new exception
-            System.out.println(e.getMessage());
-        }
-
-        /*
-        Select the right privilege level from config file
-            default: User
-        */
-        switch (properties.getProperty("privilege").toLowerCase()) {
-            case "administrator":
-                privilege = PrivilegeLevel.Administrator;
-                break;
-            case "operator":
-                privilege = PrivilegeLevel.Operator;
-                break;
-            default:
-                privilege = PrivilegeLevel.User;
-                break;
-        }
-
-        /*
-        Select the right authentication type from config file
-            default: RMCPPlus
-        */
-        switch (properties.getProperty("authentication").toLowerCase()) {
-            case "none":
-                authType = AuthenticationType.None;
-                break;
-            case "simple":
-                authType = AuthenticationType.Simple;
-                break;
-            case "md2":
-                authType = AuthenticationType.Md2;
-                break;
-            case "md5":
-                authType = AuthenticationType.Md5;
-                break;
-            case "oem":
-                authType = AuthenticationType.Oem;
-                break;
-            default:
-                authType = AuthenticationType.RMCPPlus;
-                break;
-        }
-
-        /*
-        Select the right IPMI version
-            default: 20
-        */
-        switch (Integer.getInteger(properties.getProperty("ipmiVersion"))) {
-            case 15:
-                ipmiVersion = IpmiVersion.V15;
-                break;
-            default:
-                ipmiVersion = IpmiVersion.V20;
-                break;
-        }
+            properties.load(new FileInputStream(path));
 
         // Create and return the PowerUp actuator
         return new PowerUpActuator(action,
                 ipAddress,
                 bootDuration,
-                properties.getProperty("username"),
-                properties.getProperty("password"),
-                privilege,
-                authType,
-                ipmiVersion,
-                Integer.getInteger(properties.getProperty("port")));
+                IPMIProperties.getUsername(properties),
+                IPMIProperties.getPassword(properties),
+                IPMIProperties.getPrivilegeLevel(properties),
+                IPMIProperties.getAuthenticationType(properties),
+                IPMIProperties.getIpmiVersion(properties),
+                IPMIProperties.getLocalPort(properties));
+        } catch (Exception e) {
+            //TODO: not accurate at all but no suitable constructor
+            throw new ExecutorException(action);
+        }
     }
 }

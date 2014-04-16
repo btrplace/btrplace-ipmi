@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import btrplace.executor.ExecutorException;
 import btrplace.executor.Actuator;
+import btrplace.executor.ExecutorException;
 import btrplace.plan.event.Action;
 import btrplace.plan.event.BootNode;
 import com.veraxsystems.vxipmi.coding.commands.IpmiVersion;
@@ -25,7 +25,9 @@ import com.veraxsystems.vxipmi.coding.protocol.AuthenticationType;
 
 /**
  *  An actuator to execute the BootNode action.
- *  The timeout for this actuator is set to the estimated duration of the action
+ *  The timeout for this actuator is set to the estimated duration of the action.
+ *  The notion of timeout is required as the boot operation is not blocking so
+ *  it is not possible to know when the node will be really available.
  *
  * @author Vincent KHERBACHE
  */
@@ -99,6 +101,6 @@ public class PowerUpActuator implements Actuator {
     @Override
     public int getTimeout() {
         // Define the timeout as the estimated duration of action
-        return (action.getEnd()-action.getStart());
+        return action.getEnd() - action.getStart();
     }
 }

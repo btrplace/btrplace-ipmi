@@ -39,11 +39,17 @@ public class IpmiChassisControl {
 
     private static final int STANDARD_CIPHER_SUITE = 3;
 
+    /**
+     * Default timeout for an answer in secs.
+     */
+    private static final int DEFAULT_TIMEOUT = 5;
+
     private String ipAddress;
     private String username;
     private String password;
     private int port;
 
+    private int timeout;
     private ConnectionManager connectionManager;
     private Connection connection;
     private CipherSuite cs;
@@ -76,12 +82,13 @@ public class IpmiChassisControl {
         this.authType = authType;
         this.ipmiVersion = ipmiVersion;
         this.port = port;
+        timeout = DEFAULT_TIMEOUT;
     }
 
     /**
-     * Initialize the connection to the remote node and establish a session
+     * Initialize the connection to the remote node and establish a session.
      *
-     * @throws Exception
+     * @throws Exception if an error occurred.
      */
     protected void init() throws Exception {
 
@@ -109,8 +116,27 @@ public class IpmiChassisControl {
         connectionManager.registerListener(index, listener);
 
         connection = connectionManager.getConnection(index);
+
     }
 
+    /**
+     * Set the timeout value before considering
+     * the request was lost
+     *
+     * @param t the timeout in second
+     */
+    public void setTimeout(int t) {
+        this.timeout = t;
+    }
+
+    /**
+     * Get the timeout.
+     *
+     * @return a value in second
+     */
+    public int getTimeout() {
+        return this.timeout;
+    }
     /**
      * Close the connection to the remote node
      *
@@ -126,7 +152,7 @@ public class IpmiChassisControl {
     /**
      * Power up the remote node
      *
-     * @throws Exception
+     * @throws Exception if an error occurred
      */
     public void chassisControlActionPowerUp() throws Exception {
 
@@ -157,23 +183,21 @@ public class IpmiChassisControl {
      */
     private void sendCommand(IpmiCommandCoder coder) throws Exception {
 
-        int time = 0;
-        int timeout = 5; //5s timeout
+        int timeout = DEFAULT_TIMEOUT; //5s timeout
 
         // Send the IPMI command
         connection.sendIpmiCommand(coder);
 
         // Waiting for the response
-        while (!listener.responseArrived && time < timeout) {
+        while (!listener.responseArrived && timeout > 0) {
             Thread.sleep(1000); //1s
-            time ++;
+            timeout--;
         }
-        if (time < timeout) {
-            // Print the response into the console
-            ResponseData responseData = listener.getResponseData();
-            System.out.println("Response: " + responseData.toString() + "\n");
+        if (timeout < 0) {
+            throw new Exception("Response timeout");
         }
-        else throw new Exception("Response timeout");
+        //There is no need to check the response. We just wait
+        //to be sure the request has been send successfully
     }
 
     /**
