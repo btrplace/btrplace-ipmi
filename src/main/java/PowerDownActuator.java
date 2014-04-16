@@ -30,29 +30,38 @@ public class PowerDownActuator implements Actuator {
     private String ipAddress;
     private String username;
     private String password;
-    private String privilege;
+    private PrivilegeLevel privilege;
+    private AuthenticationType authType;
+    private IpmiVersion ipmiVersion;
     private int port;
     private ShutdownNode action;
 
     /**
      * Initiates the PowerDown actuator
      *
-     * @param action    the action to execute
-     * @param ipAddress the ip address of the destination node
-     * @param username  the username to authenticate with the BMC
-     * @param password  the password to authenticate with the BMC
-     * @param privilege the user privilege level
-     * @param port      the port that library will bind to (waiting for answer)
+     * @param action        the action to execute
+     * @param ipAddress     the ip address of the destination node
+     * @param username      the username to authenticate with the BMC
+     * @param password      the password to authenticate with the BMC
+     * @param privilege     the user privilege level
+     * @param authType      the authentication type to use
+     * @param ipmiVersion   the version of IPMI messages encoding/decoding
+     * @param port          the port that library will bind to (waiting for
+     *                      answer)
      */
     public PowerDownActuator(ShutdownNode action, String ipAddress,
                              String username, String password,
-                             String privilege, int port) {
+                             PrivilegeLevel privilege,
+                             AuthenticationType authType,
+                             IpmiVersion ipmiVersion, int port) {
 
         this.action = action;
         this.ipAddress = ipAddress;
         this.username = username;
         this.password = password;
         this.privilege = privilege;
+        this.authType = authType;
+        this.ipmiVersion = ipmiVersion;
         this.port = port;
     }
 
@@ -66,7 +75,7 @@ public class PowerDownActuator implements Actuator {
     public void execute() throws ExecutorException {
 
         IpmiChassisControl ipmiCC = new IpmiChassisControl(ipAddress, username,
-                password, privilege, port);
+                password, privilege, authType, ipmiVersion, port);
 
         // Turn off the node using IPMI
         try {

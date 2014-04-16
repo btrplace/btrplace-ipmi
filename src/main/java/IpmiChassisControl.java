@@ -49,18 +49,25 @@ public class IpmiChassisControl {
     private CipherSuite cs;
     private ConnectionListenerImpl listener;
     private PrivilegeLevel privilege;
+    private AuthenticationType authType;
+    private IpmiVersion ipmiVersion;
 
     /**
      * Initiates IpmiChassisControl
      *
-     * @param ipAddress the IP address of the destination node
-     * @param username  the username  to authenticate with the BMC
-     * @param password  the password to authenticate with the BMC
-     * @param privilege the user privilege level
-     * @param port      the port that library will bind to (waiting for answer)
+     * @param ipAddress     the IP address of the destination node
+     * @param username      the username  to authenticate with the BMC
+     * @param password      the password to authenticate with the BMC
+     * @param privilege     the user privilege level
+     * @param authType      the authentication type to use
+     * @param ipmiVersion   the version of IPMI messages encoding/decoding
+     * @param port          the port that library will bind to (waiting for
+     *                      answer)
      */
     public IpmiChassisControl (String ipAddress, String username,
-                               String password, String privilege, int port) {
+                               String password, PrivilegeLevel privilege,
+                               AuthenticationType authType,
+                               IpmiVersion ipmiVersion, int port) {
 
         this.ipAddress = ipAddress;
         this.username = username;
@@ -129,11 +136,8 @@ public class IpmiChassisControl {
     public void chassisControlActionPowerUp() throws Exception {
 
         init();
-
-        sendCommand(new ChassisControl(IpmiVersion.V20, cs,
-                AuthenticationType.RMCPPlus,
+        sendCommand(new ChassisControl(ipmiVersion, cs, authType,
                 PowerCommand.PowerUp));
-
         close();
     }
 
@@ -145,11 +149,8 @@ public class IpmiChassisControl {
     public void chassisControlActionPowerDown() throws Exception {
 
         init();
-
-        sendCommand(new ChassisControl(IpmiVersion.V20, cs,
-                AuthenticationType.RMCPPlus,
+        sendCommand(new ChassisControl(ipmiVersion, cs, authType,
                 PowerCommand.PowerDown));
-
         close();
     }
 
@@ -171,7 +172,6 @@ public class IpmiChassisControl {
             Thread.sleep(1000); //1s
             time ++;
         }
-
         if (time < timeout) {
             ResponseData responseData = listener.getResponseData();
             System.out.println("Response: " + responseData.toString() + "\n");
