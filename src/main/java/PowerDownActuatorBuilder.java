@@ -38,7 +38,9 @@ import java.util.Properties;
 public class PowerDownActuatorBuilder implements ActuatorBuilder<ShutdownNode> {
 
     @Override
-    public Class<ShutdownNode> getAssociatedAction() { return ShutdownNode.class; }
+    public Class<ShutdownNode> getAssociatedAction() {
+        return ShutdownNode.class;
+    }
 
     @Override
     public Actuator build(Model model, ShutdownNode action) {
