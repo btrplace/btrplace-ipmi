@@ -87,21 +87,25 @@ public class IpmiChassisControl {
 
         connectionManager = new ConnectionManager(port);
 
+        // Create a new connection to the remote node
         int index = connectionManager.createConnection(InetAddress
                 .getByName(ipAddress));
+
+        // Get the available Cipher suites and select the third (std)
         List<CipherSuite> cipherSuites = connectionManager
                 .getAvailableCipherSuites(index);
-
         cs = cipherSuites.get(STANDARD_CIPHER_SUITE);
 
+        // Check the remote authentication capabilities
         connectionManager.getChannelAuthenticationCapabilities(index, cs,
                 privilege);
 
+        // Establish the session using the right credentials
         connectionManager.startSession(index, cs, privilege, username,
                 password, null);
 
+        // Create and register a new listener to the connection
         listener = new ConnectionListenerImpl();
-
         connectionManager.registerListener(index, listener);
 
         connection = connectionManager.getConnection(index);
@@ -148,15 +152,16 @@ public class IpmiChassisControl {
     /**
      * Send an IPMI command through the existing connection
      *
-     * @param coder
+     * @param coder The IPMI command to send
      * @throws Exception
      */
     private void sendCommand(IpmiCommandCoder coder) throws Exception {
 
-        connection.sendIpmiCommand(coder);
-
         int time = 0;
         int timeout = 5; //5s timeout
+
+        // Send the IPMI command
+        connection.sendIpmiCommand(coder);
 
         // Waiting for the response
         while (!listener.responseArrived && time < timeout) {
@@ -164,6 +169,7 @@ public class IpmiChassisControl {
             time ++;
         }
         if (time < timeout) {
+            // Print the response into the console
             ResponseData responseData = listener.getResponseData();
             System.out.println("Response: " + responseData.toString() + "\n");
         }
