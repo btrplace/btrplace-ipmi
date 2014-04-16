@@ -24,7 +24,8 @@ import com.veraxsystems.vxipmi.coding.commands.PrivilegeLevel;
 import com.veraxsystems.vxipmi.coding.protocol.AuthenticationType;
 
 /**
- * An actuator to execute the ShutdownNode action
+ * An actuator to execute the ShutdownNode action.
+ * The timeout for this actuator is set to the estimated duration of the action
  *
  * @author Vincent KHERBACHE
  */

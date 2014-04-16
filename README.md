@@ -54,7 +54,10 @@ installed in your local maven repository and available in the `target` sub-folde
 
 ## Usage ##
 
-__ TO COMPLETE __
+Look at the `PowerUpActuator` and the `PowerDownActuator` classes. Those are the classes
+to connect to an action through an `ActuatorBuilder`. A sample one is provided for each class but
+as such an adaptation is very specific to the way you store infrastructure information
+(protocol versions, credentials, servers address, ...) you shall define your own builder.
 
 ## Copyright ##
 Copyright (c) 2014 Inria. See `LICENSE.txt` for details
