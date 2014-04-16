@@ -1,6 +1,6 @@
-# Btrplace Executor #
+# Btrplace Ipmi actuators #
 
-A simple artifact to execute reconfiguration plans.
+Actuators to execute the actions BootNode and ShutdownNode using IPMI
 
 [![Build Status](http://btrp.inria.fr:8080/jenkins/buildStatus/icon?job=DEV actuator-ipmi)](http://btrp.inria.fr:8080/jenkins/job/DEV%20actuator-ipmi/)
 
