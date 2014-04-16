@@ -1,6 +1,6 @@
-# Btrplace Executor #
+# Btrplace Ipmi actuators #
 
-A simple artifact to execute reconfiguration plans.
+Actuators to execute the actions BootNode and ShutdownNode using IPMI
 
 [![Build Status](http://btrp.inria.fr:8080/jenkins/buildStatus/icon?job=DEV actuator-ipmi)](http://btrp.inria.fr:8080/jenkins/job/DEV%20actuator-ipmi/)
 
@@ -27,7 +27,7 @@ Next, just declare the dependency:
 <dependency>
    <groupId>btrplace</groupId>
    <artifactId>actuator-ipmi</artifactId>
-   <version>1.1-SNAPSHOT</version>
+   <version>1.1</version>
 </dependency>
 ```
 
@@ -54,7 +54,12 @@ installed in your local maven repository and available in the `target` sub-folde
 
 ## Usage ##
 
-__ TO COMPLETE __
+Look at the `PowerUpActuator` and the `PowerDownActuator` classes. These classes allows
+to boot or to shutdown a node through the IPMI protocol.
+
+Sample builders are provided to provide the required parameters. However, these builders
+are very specific to the way you store the parameters (protocol versions, credentials, servers address, ...).
+In practice, you may then have to define your own builder to fit your specificities.
 
 ## Copyright ##
 Copyright (c) 2014 Inria. See `LICENSE.txt` for details
