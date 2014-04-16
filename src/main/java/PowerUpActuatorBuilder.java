@@ -35,17 +35,27 @@ import java.util.Properties;
  *
  * @author Vincent KHERBACHE
  */
-public class PowerUpActuatorBuilder implements ActuatorBuilder {
+public class PowerUpActuatorBuilder implements ActuatorBuilder<BootNode> {
 
     @Override
-    public Class getAssociatedAction() { return BootNode.class; }
+    public Class<BootNode> getAssociatedAction() { return BootNode.class; }
 
     @Override
-    public Actuator build(Action action) {
+    public Actuator build(Model model, BootNode action) {
 
-        Properties properties = new Properties();
+        PrivilegeLevel privilege;
+        AuthenticationType authType;
+        IpmiVersion ipmiVersion;
+
+        // Get the node attribute (ip address)
+        Attributes attrs = model.getAttributes();
+        String ipAddress = attrs.getString(action.getNode(), "ip");
+
+        // Get the estimated boot duration
+        int bootDuration = (action.getEnd()-action.getStart());
 
         // Trying to load the config file
+        Properties properties = new Properties();
         try {
             properties.load(new FileInputStream(
                     "src/main/resources/connection.properties"));

@@ -35,17 +35,24 @@ import java.util.Properties;
  *
  * @author Vincent KHERBACHE
  */
-public class PowerDownActuatorBuilder implements ActuatorBuilder {
+public class PowerDownActuatorBuilder implements ActuatorBuilder<ShutdownNode> {
 
     @Override
-    public Class getAssociatedAction() { return ShutdownNode.class; }
+    public Class<ShutdownNode> getAssociatedAction() { return ShutdownNode.class; }
 
     @Override
-    public Actuator build(Action action) {
+    public Actuator build(Model model, ShutdownNode action) {
 
-        Properties properties = new Properties();
+        PrivilegeLevel privilege;
+        AuthenticationType authType;
+        IpmiVersion ipmiVersion;
+
+        // Get the node attribute (ip address)
+        Attributes attrs = model.getAttributes();
+        String ipAddress = attrs.getString(action.getNode(), "ip");
 
         // Trying to load the config file
+        Properties properties = new Properties();
         try {
             properties.load(new FileInputStream(
                     "src/main/resources/connection.properties"));
