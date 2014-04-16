@@ -27,7 +27,7 @@ Next, just declare the dependency:
 <dependency>
    <groupId>btrplace</groupId>
    <artifactId>actuator-ipmi</artifactId>
-   <version>1.1</version>
+   <version>1.2-SNAPSHOT</version>
 </dependency>
 ```
 
