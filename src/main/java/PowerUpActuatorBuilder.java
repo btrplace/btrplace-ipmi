@@ -15,48 +15,87 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import btrplace.executor.Actuator;
 import btrplace.executor.ActuatorBuilder;
-import btrplace.plan.event.Action;
+import btrplace.executor.ExecutorException;
+import btrplace.model.Attributes;
+import btrplace.model.Model;
 import btrplace.plan.event.BootNode;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 
 /**
- * A builder to create a PowerUp actuator from a BootNode action
+ * A builder to create a {@link PowerUpActuator} from a {@link btrplace.plan.event.BootNode} action
+ * Credentials and IPMI parameters are retrieved from a properties file using {@link IPMIProperties}.
+ * The node IP is retrieved from the {@link btrplace.model.Attributes} "ip"
  *
  * @author Vincent KHERBACHE
  */
-public class PowerUpActuatorBuilder implements ActuatorBuilder {
+public class PowerUpActuatorBuilder implements ActuatorBuilder<BootNode> {
+
+    private String path;
+
+    /**
+     * Make a new builder.
+     *
+     * @param p the path to the property file
+     */
+    public PowerUpActuatorBuilder(String p) {
+        path = p;
+    }
+
+    /**
+     * Get the path of the properties file
+     *
+     * @return a path
+     */
+    public String getProperties() {
+        return path;
+    }
+
+    /**
+     * Set the path of the properties file
+     *
+     * @param path a path
+     */
+    public void setProperties(String path) {
+        this.path = path;
+    }
 
     @Override
-    public Class getAssociatedAction() { return BootNode.class; }
+    public Class<BootNode> getAssociatedAction() {
+        return BootNode.class;
+    }
 
     @Override
-    public Actuator build(Action action) {
+    public PowerUpActuator build(Model model, BootNode action) throws ExecutorException {
 
-        Properties properties = new Properties();
+        // Get the node attribute (ip address)
+        Attributes attrs = model.getAttributes();
+        String ipAddress = attrs.getString(action.getNode(), "ip");
+        if (ipAddress == null) {
+            throw new ExecutorException(action);
+        }
+        // Get the estimated boot duration
+        int bootDuration = action.getEnd() - action.getStart();
 
         // Trying to load the config file
+        Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream(
-                    "src/main/resources/connection.properties"));
-        } catch (IOException e) {
+            properties.load(new FileInputStream(path));
 
-            // Print the error message into the console
-            // TODO: throw a new exception
-            System.out.println(e.getMessage());
+            // Create and return the PowerUp actuator
+            return new PowerUpActuator(action,
+                    ipAddress,
+                    bootDuration,
+                    IPMIProperties.getUsername(properties),
+                    IPMIProperties.getPassword(properties),
+                    IPMIProperties.getPrivilegeLevel(properties),
+                    IPMIProperties.getAuthenticationType(properties),
+                    IPMIProperties.getIpmiVersion(properties),
+                    IPMIProperties.getLocalPort(properties));
+        } catch (Exception e) {
+            throw new ExecutorException("Unable to build the actuator for " + action, e);
         }
-
-        // Create and return the PowerUp actuator
-        return new PowerUpActuator((BootNode)action,
-                properties.getProperty("ipAddress"),
-                properties.getProperty("username"),
-                properties.getProperty("password"),
-                properties.getProperty("privilege"),
-                Integer.getInteger(properties.getProperty("bootDuration")),
-                Integer.getInteger(properties.getProperty("port")));
     }
 }

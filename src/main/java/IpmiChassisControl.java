@@ -24,6 +24,7 @@ import com.veraxsystems.vxipmi.coding.commands.chassis.PowerCommand;
 import com.veraxsystems.vxipmi.coding.protocol.AuthenticationType;
 import com.veraxsystems.vxipmi.coding.security.CipherSuite;
 import com.veraxsystems.vxipmi.connection.Connection;
+import com.veraxsystems.vxipmi.connection.ConnectionException;
 import com.veraxsystems.vxipmi.connection.ConnectionListener;
 import com.veraxsystems.vxipmi.connection.ConnectionManager;
 
@@ -39,82 +40,110 @@ public class IpmiChassisControl {
 
     private static final int STANDARD_CIPHER_SUITE = 3;
 
+    /**
+     * Default timeout for an answer in secs.
+     */
+    private static final int DEFAULT_TIMEOUT = 5;
+
     private String ipAddress;
     private String username;
     private String password;
     private int port;
 
+    private int timeout;
     private ConnectionManager connectionManager;
     private Connection connection;
     private CipherSuite cs;
     private ConnectionListenerImpl listener;
     private PrivilegeLevel privilege;
+    private AuthenticationType authType;
+    private IpmiVersion ipmiVersion;
 
     /**
      * Initiates IpmiChassisControl
      *
-     * @param ipAddress the IP address of the destination node
-     * @param username  the username  to authenticate with the BMC
-     * @param password  the password to authenticate with the BMC
-     * @param privilege the user privilege level
-     * @param port      the port that library will bind to (waiting for answer)
+     * @param ipAddress     the IP address of the destination node
+     * @param username      the username  to authenticate with the BMC
+     * @param password      the password to authenticate with the BMC
+     * @param privilege     the user privilege level
+     * @param authType      the authentication type to use
+     * @param ipmiVersion   the version of IPMI messages encoding/decoding
+     * @param port          the port that library will bind to (waiting for
+     *                      answer)
      */
     public IpmiChassisControl (String ipAddress, String username,
-                               String password, String privilege, int port) {
+                               String password, PrivilegeLevel privilege,
+                               AuthenticationType authType,
+                               IpmiVersion ipmiVersion, int port) {
 
         this.ipAddress = ipAddress;
         this.username = username;
         this.password = password;
+        this.privilege = privilege;
+        this.authType = authType;
+        this.ipmiVersion = ipmiVersion;
         this.port = port;
-
-        switch (privilege) {
-            case "Administrator":
-                this.privilege = PrivilegeLevel.Administrator;
-                break;
-            case "Operator":
-                this.privilege = PrivilegeLevel.Operator;
-                break;
-            default:
-                this.privilege = PrivilegeLevel.User;
-                break;
-        }
+        timeout = DEFAULT_TIMEOUT;
     }
 
     /**
-     * Initialize the connection to the remote node and establish a session
+     * Initialize the connection to the remote node and establish a session.
      *
-     * @throws Exception
+     * @throws Exception if an error occurred.
      */
     protected void init() throws Exception {
 
         connectionManager = new ConnectionManager(port);
 
+        // Create a new connection to the remote node
         int index = connectionManager.createConnection(InetAddress
                 .getByName(ipAddress));
+
+        // Get the available Cipher suites and select the third (std)
         List<CipherSuite> cipherSuites = connectionManager
                 .getAvailableCipherSuites(index);
-
         cs = cipherSuites.get(STANDARD_CIPHER_SUITE);
 
+        // Check the remote authentication capabilities
         connectionManager.getChannelAuthenticationCapabilities(index, cs,
                 privilege);
 
+        // Establish the session using the right credentials
         connectionManager.startSession(index, cs, privilege, username,
                 password, null);
 
+        // Create and register a new listener to the connection
         listener = new ConnectionListenerImpl();
-
         connectionManager.registerListener(index, listener);
 
         connection = connectionManager.getConnection(index);
+
     }
 
     /**
+     * Set the timeout value before considering
+     * the request was lost
+     *
+     * @param t the timeout in second
+     */
+    public void setTimeout(int t) {
+        this.timeout = t;
+    }
+
+    /**
+     * Get the timeout.
+     *
+     * @return a value in second
+     */
+    public int getTimeout() {
+        return this.timeout;
+    }
+    /**
      * Close the connection to the remote node
      *
-     * @throws Exception
+     * @throws com.veraxsystems.vxipmi.connection.ConnectionException if an error occurred
      */
-    protected void close() throws Exception {
+    protected void close() throws ConnectionException {
 
         connection.closeSession();
         connection.disconnect();
@@ -124,16 +153,13 @@ public class IpmiChassisControl {
     /**
      * Power up the remote node
      *
-     * @throws Exception
+     * @throws Exception if an error occurred
      */
     public void chassisControlActionPowerUp() throws Exception {
 
         init();
-
-        sendCommand(new ChassisControl(IpmiVersion.V20, cs,
-                AuthenticationType.RMCPPlus,
+        sendCommand(new ChassisControl(ipmiVersion, cs, authType,
                 PowerCommand.PowerUp));
-
         close();
     }
 
@@ -145,38 +171,32 @@ public class IpmiChassisControl {
     public void chassisControlActionPowerDown() throws Exception {
 
         init();
-
-        sendCommand(new ChassisControl(IpmiVersion.V20, cs,
-                AuthenticationType.RMCPPlus,
+        sendCommand(new ChassisControl(ipmiVersion, cs, authType,
                 PowerCommand.PowerDown));
-
         close();
     }
 
     /**
      * Send an IPMI command through the existing connection
      *
-     * @param coder
+     * @param coder The IPMI command to send
      * @throws Exception
      */
     private void sendCommand(IpmiCommandCoder coder) throws Exception {
 
+        // Send the IPMI command
         connection.sendIpmiCommand(coder);
 
-        int time = 0;
-        int timeout = 5; //5s timeout
-
-        // Waiting for the response
-        while (!listener.responseArrived && time < timeout) {
-            Thread.sleep(1000); //1s
-            time ++;
+        // Waiting for the response, check every second
+        while (!listener.responseArrived && timeout > 0) {
+            Thread.sleep(1000);
+            timeout--;
         }
-
-        if (time < timeout) {
-            ResponseData responseData = listener.getResponseData();
-            System.out.println("Response: " + responseData.toString() + "\n");
+        if (timeout < 0) {
+            throw new Exception("Response timeout");
         }
-        else throw new Exception("Response timeout");
+        //There is no need to check the response. We just wait
+        //to be sure the request has been send successfully
     }
 
     /**
@@ -211,6 +231,7 @@ public class IpmiChassisControl {
                            Exception exception) {
             this.responseData = responseData;
             if (exception != null) {
+                // Print the error message into the console
                 System.out.println(exception.getMessage());
                 this.responseData = null;
             }
