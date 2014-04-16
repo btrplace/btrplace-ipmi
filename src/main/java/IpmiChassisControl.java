@@ -24,6 +24,7 @@ import com.veraxsystems.vxipmi.coding.commands.chassis.PowerCommand;
 import com.veraxsystems.vxipmi.coding.protocol.AuthenticationType;
 import com.veraxsystems.vxipmi.coding.security.CipherSuite;
 import com.veraxsystems.vxipmi.connection.Connection;
+import com.veraxsystems.vxipmi.connection.ConnectionException;
 import com.veraxsystems.vxipmi.connection.ConnectionListener;
 import com.veraxsystems.vxipmi.connection.ConnectionManager;
 
@@ -140,9 +141,9 @@ public class IpmiChassisControl {
     /**
      * Close the connection to the remote node
      *
-     * @throws Exception
+     * @throws com.veraxsystems.vxipmi.connection.ConnectionException if an error occurred
      */
-    protected void close() throws Exception {
+    protected void close() throws ConnectionException {
 
         connection.closeSession();
         connection.disconnect();
@@ -183,14 +184,12 @@ public class IpmiChassisControl {
      */
     private void sendCommand(IpmiCommandCoder coder) throws Exception {
 
-        int timeout = DEFAULT_TIMEOUT; //5s timeout
-
         // Send the IPMI command
         connection.sendIpmiCommand(coder);
 
-        // Waiting for the response
+        // Waiting for the response, check every second
         while (!listener.responseArrived && timeout > 0) {
-            Thread.sleep(1000); //1s
+            Thread.sleep(1000);
             timeout--;
         }
         if (timeout < 0) {

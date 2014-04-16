@@ -62,7 +62,7 @@ public class PowerDownActuatorBuilder implements ActuatorBuilder<ShutdownNode> {
     /**
      * Set the path of the properties file
      *
-     * @return a path
+     * * @param path a path
      */
     public void setProperties(String path) {
         this.path = path;
@@ -92,8 +92,7 @@ public class PowerDownActuatorBuilder implements ActuatorBuilder<ShutdownNode> {
                     IPMIProperties.getIpmiVersion(properties),
                     IPMIProperties.getLocalPort(properties));
         } catch (Exception e) {
-            //TODO: not accurate at all but no suitable constructor
-            throw new ExecutorException(action);
+            throw new ExecutorException("Unable to build the actuator for " + action, e);
         }
     }
 }

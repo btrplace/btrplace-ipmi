@@ -99,7 +99,7 @@ public final class IPMIProperties {
      *
      * @param p the properties file
      * @return the IPMI version
-     * @throws Exception if the version or unsupported is missing
+     * @throws Exception if the version is missing or not supported
      */
     public static IpmiVersion getIpmiVersion(Properties p) throws Exception {
         String v = p.getProperty(IPMI_VERSION);
@@ -121,7 +121,7 @@ public final class IPMIProperties {
      *
      * @param p the properties file
      * @return the authentication type
-     * @throws Exception if the port is missing
+     * @throws Exception if the port is missing or not supported
      */
     public static AuthenticationType getAuthenticationType(Properties p) throws Exception {
         String type = p.getProperty(AUTHENTICATION);
@@ -146,6 +146,14 @@ public final class IPMIProperties {
         throw new Exception("Unsupported authentication type '" + type + "'. Supported value: 'rmcpplus', 'none','simple','md2','md5','oem'");
     }
 
+    /**
+     * Read the privilege level from the properties.
+     * The values is read from the {@link #PRIVILEGE} property.
+     *
+     * @param p the properties file
+     * @return the privilege level
+     * @throws Exception if the information is missing or not supported
+     */
     public static PrivilegeLevel getPrivilegeLevel(Properties p) throws Exception {
         String lvl = p.getProperty(PRIVILEGE);
         if (lvl == null) {

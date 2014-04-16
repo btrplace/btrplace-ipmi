@@ -56,14 +56,15 @@ public class PowerUpActuatorBuilder implements ActuatorBuilder<BootNode> {
     /**
      * Set the path of the properties file
      *
-     * @return a path
+     * @param path a path
      */
     public void setProperties(String path) {
         this.path = path;
     }
 
     @Override
-    public Class<BootNode> getAssociatedAction() { return BootNode.class;
+    public Class<BootNode> getAssociatedAction() {
+        return BootNode.class;
     }
 
     @Override
@@ -76,26 +77,25 @@ public class PowerUpActuatorBuilder implements ActuatorBuilder<BootNode> {
             throw new ExecutorException(action);
         }
         // Get the estimated boot duration
-        int bootDuration = action.getEnd()-action.getStart();
+        int bootDuration = action.getEnd() - action.getStart();
 
         // Trying to load the config file
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream(path));
 
-        // Create and return the PowerUp actuator
-        return new PowerUpActuator(action,
-                ipAddress,
-                bootDuration,
-                IPMIProperties.getUsername(properties),
-                IPMIProperties.getPassword(properties),
-                IPMIProperties.getPrivilegeLevel(properties),
-                IPMIProperties.getAuthenticationType(properties),
-                IPMIProperties.getIpmiVersion(properties),
-                IPMIProperties.getLocalPort(properties));
+            // Create and return the PowerUp actuator
+            return new PowerUpActuator(action,
+                    ipAddress,
+                    bootDuration,
+                    IPMIProperties.getUsername(properties),
+                    IPMIProperties.getPassword(properties),
+                    IPMIProperties.getPrivilegeLevel(properties),
+                    IPMIProperties.getAuthenticationType(properties),
+                    IPMIProperties.getIpmiVersion(properties),
+                    IPMIProperties.getLocalPort(properties));
         } catch (Exception e) {
-            //TODO: not accurate at all but no suitable constructor
-            throw new ExecutorException(action);
+            throw new ExecutorException("Unable to build the actuator for " + action, e);
         }
     }
 }
