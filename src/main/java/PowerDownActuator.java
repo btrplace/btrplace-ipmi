@@ -19,6 +19,9 @@ import btrplace.executor.Actuator;
 import btrplace.executor.ExecutorException;
 import btrplace.plan.event.Action;
 import btrplace.plan.event.ShutdownNode;
+import com.veraxsystems.vxipmi.coding.commands.IpmiVersion;
+import com.veraxsystems.vxipmi.coding.commands.PrivilegeLevel;
+import com.veraxsystems.vxipmi.coding.protocol.AuthenticationType;
 
 /**
  * An actuator to execute the ShutdownNode action

@@ -72,19 +72,10 @@ public class IpmiChassisControl {
         this.ipAddress = ipAddress;
         this.username = username;
         this.password = password;
+        this.privilege = privilege;
+        this.authType = authType;
+        this.ipmiVersion = ipmiVersion;
         this.port = port;
-
-        switch (privilege) {
-            case "Administrator":
-                this.privilege = PrivilegeLevel.Administrator;
-                break;
-            case "Operator":
-                this.privilege = PrivilegeLevel.Operator;
-                break;
-            default:
-                this.privilege = PrivilegeLevel.User;
-                break;
-        }
     }
 
     /**

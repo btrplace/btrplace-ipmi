@@ -17,8 +17,14 @@
 
 import btrplace.executor.Actuator;
 import btrplace.executor.ActuatorBuilder;
+import btrplace.executor.ExecutorException;
+import btrplace.model.Attributes;
+import btrplace.model.Model;
 import btrplace.plan.event.Action;
 import btrplace.plan.event.ShutdownNode;
+import com.veraxsystems.vxipmi.coding.commands.IpmiVersion;
+import com.veraxsystems.vxipmi.coding.commands.PrivilegeLevel;
+import com.veraxsystems.vxipmi.coding.protocol.AuthenticationType;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,12 +56,68 @@ public class PowerDownActuatorBuilder implements ActuatorBuilder {
             System.out.println(e.getMessage());
         }
 
+        /*
+        Select the right privilege level from config file
+            default: User
+        */
+        switch (properties.getProperty("privilege").toLowerCase()) {
+            case "administrator":
+                privilege = PrivilegeLevel.Administrator;
+                break;
+            case "operator":
+                privilege = PrivilegeLevel.Operator;
+                break;
+            default:
+                privilege = PrivilegeLevel.User;
+                break;
+        }
+
+        /*
+        Select the right authentication type from config file
+            default: RMCPPlus
+        */
+        switch (properties.getProperty("authentication").toLowerCase()) {
+            case "none":
+                authType = AuthenticationType.None;
+                break;
+            case "simple":
+                authType = AuthenticationType.Simple;
+                break;
+            case "md2":
+                authType = AuthenticationType.Md2;
+                break;
+            case "md5":
+                authType = AuthenticationType.Md5;
+                break;
+            case "oem":
+                authType = AuthenticationType.Oem;
+                break;
+            default:
+                authType = AuthenticationType.RMCPPlus;
+                break;
+        }
+
+        /*
+        Select the right IPMI version
+            default: 20
+        */
+        switch (Integer.getInteger(properties.getProperty("ipmiVersion"))) {
+            case 15:
+                ipmiVersion = IpmiVersion.V15;
+                break;
+            default:
+                ipmiVersion = IpmiVersion.V20;
+                break;
+        }
+
         // Create and return the PowerDown actuator
-        return new PowerDownActuator((ShutdownNode)action,
-                properties.getProperty("ipAddress"),
+        return new PowerDownActuator(action,
+                ipAddress,
                 properties.getProperty("username"),
                 properties.getProperty("password"),
-                properties.getProperty("privilege"),
+                privilege,
+                authType,
+                ipmiVersion,
                 Integer.getInteger(properties.getProperty("port")));
     }
 }
