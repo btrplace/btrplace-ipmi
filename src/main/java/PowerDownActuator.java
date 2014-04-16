@@ -90,4 +90,10 @@ public class PowerDownActuator implements Actuator {
 
     @Override
     public Action getAction() { return action; }
+
+    @Override
+    public int getTimeout() {
+        // Define the timeout as the estimated duration of action
+        return (action.getEnd()-action.getStart());
+    }
 }
