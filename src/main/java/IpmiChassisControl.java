@@ -192,7 +192,7 @@ public class IpmiChassisControl {
             Thread.sleep(1000);
             timeout--;
         }
-        if (timeout < 0) {
+        if (timeout <= 0) {
             throw new Exception("Response timeout");
         }
         //There is no need to check the response. We just wait
